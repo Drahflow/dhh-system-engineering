@@ -185,18 +185,21 @@ kubectl config set-credentials %s \
 		if err != nil {
 			log.Printf("Error getting tokens: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		email, err := getUserEmail(tokResponse.AccessToken)
 		if err != nil {
 			log.Printf("Error getting user email: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		hostedDomain, err := getHostedDomain(tokResponse.AccessToken)
 		if err != nil {
 			log.Printf("Error getting user hosted domain: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
 		if ! strings.EqualFold(hostedDomain, expectedHostedDomain) {
