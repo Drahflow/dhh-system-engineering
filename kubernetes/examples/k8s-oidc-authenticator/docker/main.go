@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 )
 
 var (
@@ -202,7 +201,7 @@ kubectl config set-credentials %s \
 			return
 		}
 
-		if ! strings.EqualFold(hostedDomain, expectedHostedDomain) {
+		if hostedDomain != expectedHostedDomain {
 			log.Printf("Error hosted domain does not match (was %s instead of %s)\n", hostedDomain, expectedHostedDomain)
 			http.Error(w, "Forbidden", 403)
 			return
