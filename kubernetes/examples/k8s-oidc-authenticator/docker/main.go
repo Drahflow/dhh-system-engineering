@@ -10,8 +10,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-
-	"github.com/utilitywarehouse/go-operational/op"
 )
 
 var (
@@ -226,13 +224,6 @@ func main() {
 
 	m.Handle("/", googleRedirect())
 	m.Handle("/callback", googleCallback())
-
-	http.Handle("/__/", op.NewHandler(
-		op.NewStatus("Kubernetes config builder", "Constructs kube config for the user to allow access to the api server.").
-			AddOwner("Infrastructure", "#infra").
-			ReadyUseHealthCheck(),
-	),
-	)
 
 	http.Handle("/", m)
 	log.Println("Listening on :8080")
