@@ -44,7 +44,7 @@ type TokenResponse struct {
 }
 
 // Get the id_token and refresh_token from google
-func getTokens(clientID, clientSecret, code string) (*TokenResponse, error) {
+func getTokens(code string) (*TokenResponse, error) {
 	val := url.Values{}
 	val.Add("grant_type", "authorization_code")
 	val.Add("redirect_uri", callbackURL)
@@ -179,7 +179,7 @@ kubectl config set-credentials %s \
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
-		tokResponse, err := getTokens(clientID, clientSecret, code)
+		tokResponse, err := getTokens(code)
 
 		if err != nil {
 			log.Printf("Error getting tokens: %s\n", err)
