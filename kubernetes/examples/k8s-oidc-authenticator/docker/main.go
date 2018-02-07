@@ -139,48 +139,156 @@ func googleRedirect() http.Handler {
 
 func googleCallback() http.Handler {
 
-	runHelp := `
-# Run the following command to configure a kubernetes user for use with 'kubectl'
+	outputTemplate := template.Must(template.New("shell").Parse(`
+<html><head>
+<style type="text/css">
+.shell-wrap {
+  width: auto;
+  margin: 50px 50px 20px 50px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+  border-radius: 3px;
+}
 
-	`
+.shell-top-bar {
+  text-align: center;
+  color: #525252;
+  padding: 5px 0;
+  margin: 0;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+  font-size: 0.85em;
+  border: 1px solid #CCCCCC;
+  border-bottom: none;
 
-	kubectlCMDTemplate := `
-kubectl config set-credentials %s \
---auth-provider=oidc \
---auth-provider-arg=client-id=%s \
---auth-provider-arg=client-secret=%s \
---auth-provider-arg=id-token=%s \
---auth-provider-arg=idp-issuer-url=%s \
---auth-provider-arg=refresh-token=%s
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 
-	`
+  background: #f7f7f7; /* Old browsers */
+  background: linear-gradient(to bottom,  #f7f7f7 0%,#B8B8B8 100%); /* W3C */
+}
 
-	userConfigHelp := `
-# Configure your context to use your Google user account
-# Go to to your kube config and update user under context part to:
-# '''
-# user: %s
-# '''
+.shell-body {
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  background: #141414;
+  color: #45D40C;
+  font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+  line-height: 1.6em;
 
-# kubectl config set-context my-context --cluster my-cluster --user %s --server=https://api.your-cluster.com
-# kubectl config set-cluster my-cluster --insecure-skip-tls-verify=true --server=https://api.your-cluster.com
-# kubectl config use-context my-context
+  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
 
-# Test connection by running
-# '''
-# kubectl get nodes
-# '''
-# You should see list of nodes in cluster
+.shell-body li.cmd:before {
+  content: '$';
+  position: absolute;
+  left: 0;
+  top: 0;
+}
 
-	`
+.shell-body li.comment:before {
+  content: '#';
+  position: absolute;
+  left: 0;
+  top: 0;
+}
 
-	outputTemplate := runHelp + kubectlCMDTemplate + userConfigHelp
+.shell-body li.comment {
+  color: #450CD4;
+}
 
+.shell-body li.comment, .shell-top-bar, #btn-copy {
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.shell-body li {
+  word-wrap: break-word;
+  position: relative;
+  padding: 0 0 0 15px;
+}
+#clipboard {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+  border: none;
+}
+#btn-copy {
+  color: #fff;
+  background-color: #007bff;
+  border: 1px solid #007bff;
+  border-radius: .3rem;
+  text-align: center;
+  vertical-align: middle;
+  font-family: sans-serif;
+  margin: 0px auto;
+  width: 10em;
+  padding: 4px 20px;
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  box-shadow: 2px 2px 2px 1px rgba(100,100,100,.60);
+}
+#btn-copy:hover{
+  color: #fff;
+  background-color: #0069d9;
+  border-color: #0062cc;
+}
+</style>
+<script type="text/javascript">
+function copy_to_clipboard() {
+  let clipboard = document.getElementById("clipboard");
+  clipboard.value = Array.from(document.querySelectorAll('.cmd')).map((n) => n.innerText).join('\n');
+  clipboard.select();
+
+  if(!document.execCommand("copy")) {
+    alert("Sorry, your browser does not allow direct access to clipboard.\n" +
+      "Please select all (no worries) and copy manually.");
+  }
+
+  document.getElementById("btn-copy").style.boxShadow = 'none';
+}
+</script>
+</head><body>
+<div class="shell-wrap">
+  <p class="shell-top-bar">~/work/docker-setup</p>
+  <ul class="shell-body" id="commands">
+<li class='comment'>Run the following command to configure a kubernetes user for use with 'kubectl'
+<br><br>
+</li>
+
+<li class='cmd'>kubectl config set-credentials {{ .email }} \<br>
+--auth-provider=oidc \<br>
+--auth-provider-arg=client-id={{ .clientID }} \<br>
+--auth-provider-arg=client-secret={{ .clientSecret }} \<br>
+--auth-provider-arg=id-token={{ .idToken }} \<br>
+--auth-provider-arg=idp-issuer-url={{ .issuerURL }} \<br>
+--auth-provider-arg=refresh-token={{ .refreshToken }}<br><br>
+</li>
+
+<li class='comment'>Configure your context to use your Google user account</li>
+<li class='comment'>Go to to your kube config and update user under context part to:</li>
+<li class='comment'>'''</li>
+<li class='comment'>user: {{ .email }}</li>
+<li class='comment'>'''<br><br></li>
+
+<li class='cmd'>kubectl config set-context my-context --cluster my-cluster --user {{ .email }} --server=https://api.your-cluster.com</li>
+<li class='cmd'>kubectl config set-cluster my-cluster --insecure-skip-tls-verify=true --server=https://api.your-cluster.com</li>
+<li class='cmd'>kubectl config use-context my-context<br><br></li>
+
+<li class='comment'>Test connection by running (you should see list of nodes in cluster)<br><br></li>
+<li class='cmd'>kubectl get nodes</li>
+  </ul>
+</div>
+<div id="btn-copy" onclick="copy_to_clipboard();">Copy to clipboard</div>
+<textarea id="clipboard"></textarea>
+</body></html>
+	`))
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
-		tokResponse, err := getTokens(code)
 
+		tokResponse, err := getTokens(code)
 		if err != nil {
 			log.Printf("Error getting tokens: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -208,15 +316,20 @@ kubectl config set-credentials %s \
 		}
 
 
-		config := fmt.Sprintf(outputTemplate, email, clientID, clientSecret, tokResponse.IdToken, idpIssuerURL, tokResponse.RefreshToken, email)
-
-		output := config
-
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		_, err = w.Write([]byte(output))
+
+		err = outputTemplate.Execute(w, map[string]string {
+			"email": email,
+			"clientID": clientID,
+			"clientSecret": clientSecret,
+			"idToken": tokResponse.IdToken,
+			"issuerURL": idpIssuerURL,
+			"refreshToken": tokResponse.RefreshToken,
+		});
+
 		if err != nil {
-			log.Println("failed to write about response")
-			w.WriteHeader(http.StatusInternalServerError)
+			log.Println("failed to write about response: %s", err)
 		}
 	})
 }
