@@ -303,7 +303,7 @@ kubectl config
 {{ arg "--auth-provider-arg=client-secret=" .clientSecret }}
 {{ arg "--auth-provider-arg=id-token=" .idToken }}
 {{ arg "--auth-provider-arg=idp-issuer-url=" .issuerURL }}
-{{ arg "--auth-provider-arg=refresh-token=" .refreshToken }}
+{{ arg "--auth-provider-arg=refresh-token=" .refreshToken }}<br><br>
 </li>
 
 <li class='comment'>Configure your context to use your Google user account</li>
@@ -317,10 +317,9 @@ kubectl config
 {{ arg "set-context " .context }}
 {{ arg "--cluster " .cluster }}
 {{ arg "--user " .email }}
-{{ arg "--server=https://api." .cluster }}
 </li>
 {{ if .caData }}
-<li class='cmd'>echo '{{ .caData }}' {{ arg " | " }} {{ arg "base64 --decode > ca-data" }}</li>
+<li class='cmd'>echo '{{ .caData }}' {{ arg " | " }} {{ arg "base64 --decode -i > ca-data" }}</li>
 <li class='cmd'>
 kubectl config
 {{ arg "set-cluster " .cluster }}
