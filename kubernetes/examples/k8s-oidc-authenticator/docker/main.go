@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"io"
 	"io/ioutil"
+	"html/template"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,6 +17,8 @@ var (
 	clientID     = os.Getenv("CLIENT_ID")
 	clientSecret = os.Getenv("CLIENT_SECRET")
 	callbackURL  = os.Getenv("CALLBACK_URL")
+	clusterName  = os.Getenv("CLUSTER_NAME")
+	caData       = os.Getenv("CA_DATA")
 	expectedHostedDomain = os.Getenv("ALLOWED_DOMAIN")
 )
 
@@ -137,14 +141,39 @@ func googleRedirect() http.Handler {
 	})
 }
 
-func googleCallback() http.Handler {
+func brHelper(args ...string) template.HTML {
+	return template.HTML(
+		fmt.Sprintf(
+			`<div class="br-helper">\</div><div class="br-helper2"> </div><wbr>` +
+			`<span class="br-helper">%s</span>`, template.HTMLEscapeString(
+				strings.Join(args, ""))))
+}
 
-	outputTemplate := template.Must(template.New("shell").Parse(`
+func googleCallback() http.Handler {
+	outputTemplate := template.Must(template.New("shell").Funcs(template.FuncMap{
+		"arg": brHelper,
+	}).Parse(`
 <html><head>
 <style type="text/css">
+div.br-helper {
+  display: inline-block;
+  overflow: visible;
+  width: 0px;
+}
+div.br-helper2 {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 0px;
+  overflow: hidden;
+}
+span.br-helper {
+  white-space: nowrap;
+  background-color: #141414;
+}
 .shell-wrap {
   width: auto;
-  margin: 50px 50px 20px 50px;
+  margin: 20px 50px 50px 50px;
   box-shadow: 0 0 30px rgba(0,0,0,0.4);
   border-radius: 3px;
 }
@@ -174,6 +203,7 @@ func googleCallback() http.Handler {
   color: #45D40C;
   font: 0.8em 'Andale Mono', Consolas, 'Courier New';
   line-height: 1.6em;
+  overflow: scroll;
 
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
@@ -197,7 +227,7 @@ func googleCallback() http.Handler {
   color: #450CD4;
 }
 
-.shell-body li.comment, .shell-top-bar, #btn-copy {
+.shell-body li.comment, .shell-top-bar, #btn-copy, .br-helper2 {
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -214,6 +244,8 @@ func googleCallback() http.Handler {
   height: 0px;
   overflow: hidden;
   border: none;
+  position: fixed;
+  top: -20px;
 }
 #btn-copy {
   color: #fff;
@@ -238,7 +270,11 @@ func googleCallback() http.Handler {
 <script type="text/javascript">
 function copy_to_clipboard() {
   let clipboard = document.getElementById("clipboard");
-  clipboard.value = Array.from(document.querySelectorAll('.cmd')).map((n) => n.innerText).join('\n');
+  let commands = Array.from(document.querySelectorAll('.cmd')).map((n) => n.innerText).join('\n');
+  commands = commands.replace(/\\ /g, "");
+  commands = commands.replace(/\\\n/g, " ");
+  commands = commands.replace(/  /g, " ");
+  clipboard.value = commands;
   clipboard.select();
 
   if(!document.execCommand("copy")) {
@@ -250,6 +286,8 @@ function copy_to_clipboard() {
 }
 </script>
 </head><body>
+<textarea id="clipboard"></textarea>
+<div id="btn-copy" onclick="copy_to_clipboard();">Copy to clipboard</div>
 <div class="shell-wrap">
   <p class="shell-top-bar">~/work/docker-setup</p>
   <ul class="shell-body" id="commands">
@@ -257,13 +295,15 @@ function copy_to_clipboard() {
 <br><br>
 </li>
 
-<li class='cmd'>kubectl config set-credentials {{ .email }} \<br>
---auth-provider=oidc \<br>
---auth-provider-arg=client-id={{ .clientID }} \<br>
---auth-provider-arg=client-secret={{ .clientSecret }} \<br>
---auth-provider-arg=id-token={{ .idToken }} \<br>
---auth-provider-arg=idp-issuer-url={{ .issuerURL }} \<br>
---auth-provider-arg=refresh-token={{ .refreshToken }}<br><br>
+<li class='cmd'>
+kubectl config
+{{ arg "set-credentials " .email }}
+{{ arg "--auth-provider=oidc" }}
+{{ arg "--auth-provider-arg=client-id=" .clientID }}
+{{ arg "--auth-provider-arg=client-secret=" .clientSecret }}
+{{ arg "--auth-provider-arg=id-token=" .idToken }}
+{{ arg "--auth-provider-arg=idp-issuer-url=" .issuerURL }}
+{{ arg "--auth-provider-arg=refresh-token=" .refreshToken }}
 </li>
 
 <li class='comment'>Configure your context to use your Google user account</li>
@@ -272,16 +312,37 @@ function copy_to_clipboard() {
 <li class='comment'>user: {{ .email }}</li>
 <li class='comment'>'''<br><br></li>
 
-<li class='cmd'>kubectl config set-context my-context --cluster my-cluster --user {{ .email }} --server=https://api.your-cluster.com</li>
-<li class='cmd'>kubectl config set-cluster my-cluster --insecure-skip-tls-verify=true --server=https://api.your-cluster.com</li>
-<li class='cmd'>kubectl config use-context my-context<br><br></li>
+<li class='cmd'>
+kubectl config
+{{ arg "set-context " .context }}
+{{ arg "--cluster " .cluster }}
+{{ arg "--user " .email }}
+{{ arg "--server=https://api." .cluster }}
+</li>
+{{ if .caData }}
+<li class='cmd'>echo '{{ .caData }}' {{ arg " | " }} {{ arg "base64 --decode > ca-data" }}</li>
+<li class='cmd'>
+kubectl config
+{{ arg "set-cluster " .cluster }}
+{{ arg "--embed-certs=true" }}
+{{ arg "--certificate-authority=ca-data" }}
+{{ arg "--server=https://api." .cluster }}
+</li>
+<li class='cmd'>rm ca-data</li>
+{{ else }}
+<li class='cmd'>
+kubectl config
+{{ arg "set-cluster " .cluster }}
+{{ arg "--insecure-skip-tls-verify=true" }}
+{{ arg "--server=https://api." .cluster }}
+</li>
+{{ end }}
+<li class='cmd'>kubectl config use-context {{ .context }}<br><br></li>
 
 <li class='comment'>Test connection by running (you should see list of nodes in cluster)<br><br></li>
 <li class='cmd'>kubectl get nodes</li>
   </ul>
 </div>
-<div id="btn-copy" onclick="copy_to_clipboard();">Copy to clipboard</div>
-<textarea id="clipboard"></textarea>
 </body></html>
 	`))
 
@@ -319,6 +380,11 @@ function copy_to_clipboard() {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 
+		outputCluster := "my-cluster.my-domain.com"
+		if clusterName != "" {
+			outputCluster = clusterName
+		}
+
 		err = outputTemplate.Execute(w, map[string]string {
 			"email": email,
 			"clientID": clientID,
@@ -326,6 +392,9 @@ function copy_to_clipboard() {
 			"idToken": tokResponse.IdToken,
 			"issuerURL": idpIssuerURL,
 			"refreshToken": tokResponse.RefreshToken,
+			"cluster": outputCluster,
+			"context": outputCluster,
+			"caData": caData,
 		});
 
 		if err != nil {
