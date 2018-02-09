@@ -331,7 +331,10 @@ kubectl config
 {{ arg "--user " .email }}
 </li>
 {{ if .caData }}
-<li class='cmd'>echo '{{ .caData }}' {{ arg " | " }} {{ arg "base64 --decode -i > ca-data" }}</li>
+<li class='cmd'>
+echo '{{ .caData }}' {{ arg "| " }}
+{{ arg "tr -cd 'a-zA-Z0-9=/' | " }}
+{{ arg "base64 --decode > ca-data" }}</li>
 <li class='cmd'>
 kubectl config
 {{ arg "set-cluster " .cluster }}
