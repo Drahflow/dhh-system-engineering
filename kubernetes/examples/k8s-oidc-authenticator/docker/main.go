@@ -22,6 +22,18 @@ var (
 	expectedHostedDomain = os.Getenv("ALLOWED_DOMAIN")
 )
 
+var expectedEmails = map[string]bool{}
+
+func init() {
+	emailsStr := os.Getenv("ALLOWED_EMAILS")
+	if emailsStr != "" {
+		emails := strings.Split(emailsStr, ";")
+		for _, addr := range emails {
+			expectedEmails[addr] = true
+		}
+	}
+}
+
 const oauthURL = "https://accounts.google.com/o/oauth2/auth?redirect_uri=%s&response_type=code&client_id=%s&scope=openid+email+profile&approval_prompt=force&access_type=offline"
 const tokenURL = "https://www.googleapis.com/oauth2/v3/token"
 const userInfoURL = "https://www.googleapis.com/oauth2/v1/userinfo"
@@ -369,8 +381,9 @@ kubectl config
 			return
 		}
 
-		if hostedDomain != expectedHostedDomain {
-			log.Printf("Error hosted domain does not match (was %s instead of %s)\n", hostedDomain, expectedHostedDomain)
+		_, emailAllowed := expectedEmails[email]
+		if hostedDomain != expectedHostedDomain && !emailAllowed {
+			log.Printf("Error hosted domain does not match (expected domain %s, but email was %s)\n", expectedHostedDomain, email)
 			http.Error(w, "Forbidden", 403)
 			return
 		}
