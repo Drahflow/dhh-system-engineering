@@ -29,6 +29,14 @@ spec:
             value: {{ .Values.oidc.allowed_domain }}
           - name: ALLOWED_EMAIL_ADDRESSES
             value: {{ template "allowed_email_addresses" . }}
+{{- if .Values.cluster_ca_data }}
+          - name: CA_DATA
+            value: {{ .Values.cluster_ca_data }}
+{{- end }}
+{{- if .Values.cluster_name }}
+          - name: CLUSTER_NAME
+            value: {{ .Values.cluster_name }}
+{{- end }}
         ports:
           - containerPort: 8080
             protocol: TCP

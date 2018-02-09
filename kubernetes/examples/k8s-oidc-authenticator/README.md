@@ -91,6 +91,12 @@ role_bindings:
     default:
       - user3@my-domain.com
       - user4@my-domain.com
+
+# The name of your cluster used in KUBECONFIG file
+cluster_name: cluster1.my-domain.com
+
+# Optional CA data to verify cluster certificate. Otherwise `insecure-skip-tls-verify` option will be used
+cluster_ca_data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMwekNDQWJ1Z0F3SUJBZ0lNRlFoOTdjTmdTNmpYMjBOa01BMEdDU3FHU0liM0RRRUJDd1VBTUJVeEV6QVIKYmxhaApibGFoCmJsYWgKTUlJQzB6Q0NBYnVnQXdJQkFnSU1GUWg5N2NOZ1M2algyME5rTUEwR0NTcUdTSWIzRFFFQkN3VUFNQlV4RXpBUgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
 ```
 
 Install the chart:

@@ -35,6 +35,7 @@ Pull requests welcome!
 - [ExternalDNS](kubernetes/examples/external-dns): A tool that automatically creates DNS records for Kubernetes resources.
 - [Kubernetes Best Practices](https://speakerdeck.com/thesandlord/kubernetes-best-practices): A great presentation from a Google engineer.
 - [Kubernetes Autoscaling](kubernetes/examples/autoscaling): How to set up autoscaling for both deployment and cluster nodes.
+- [Kubernetes OpenID Connect authenticator](kubernetes/examples/k8s-oidc-authenticator): API Authentication using Google OIDC
 - [Kubernetes dashboard with OAuth2](kubernetes/examples/dashboard-oauth): Run the Kubernetes dashboard behind OAuth2
 
 ## Other useful tools

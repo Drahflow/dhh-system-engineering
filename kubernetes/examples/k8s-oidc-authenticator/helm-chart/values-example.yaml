@@ -17,3 +17,6 @@ role_bindings:
     my-namespace:
       - user3@my-domain.com
       - user4@my-domain.com
+
+cluster_name: cluster1.my-domain.com
+cluster_ca_data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMwekNDQWJ1Z0F3SUJBZ0lNRlFoOTdjTmdTNmpYMjBOa01BMEdDU3FHU0liM0RRRUJDd1VBTUJVeEV6QVIKYmxhaApibGFoCmJsYWgKTUlJQzB6Q0NBYnVnQXdJQkFnSU1GUWg5N2NOZ1M2algyME5rTUEwR0NTcUdTSWIzRFFFQkN3VUFNQlV4RXpBUgotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
