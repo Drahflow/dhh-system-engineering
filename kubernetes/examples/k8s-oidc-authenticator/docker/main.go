@@ -25,9 +25,9 @@ var (
 var expectedEmails = map[string]bool{}
 
 func init() {
-	emailsStr := os.Getenv("ALLOWED_EMAILS")
+	emailsStr := os.Getenv("ALLOWED_EMAIL_ADDRESSES")
 	if emailsStr != "" {
-		emails := strings.Split(emailsStr, ";")
+		emails := strings.Split(emailsStr, ",")
 		for _, addr := range emails {
 			expectedEmails[addr] = true
 		}
