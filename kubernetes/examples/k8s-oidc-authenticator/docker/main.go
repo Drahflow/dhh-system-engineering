@@ -153,36 +153,10 @@ func googleRedirect() http.Handler {
 	})
 }
 
-func brHelper(args ...string) template.HTML {
-	return template.HTML(
-		fmt.Sprintf(
-			`<div class="br-helper">\</div><div class="br-helper2"> </div><wbr>` +
-			`<span class="br-helper">%s</span>`, template.HTMLEscapeString(
-				strings.Join(args, ""))))
-}
-
 func googleCallback() http.Handler {
-	outputTemplate := template.Must(template.New("shell").Funcs(template.FuncMap{
-		"arg": brHelper,
-	}).Parse(`
+	outputTemplate := template.Must(template.New("shell").Parse(`
 <html><head>
 <style type="text/css">
-div.br-helper {
-  display: inline-block;
-  overflow: visible;
-  width: 0px;
-}
-div.br-helper2 {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 0px;
-  overflow: hidden;
-}
-span.br-helper {
-  white-space: nowrap;
-  background-color: #141414;
-}
 .shell-wrap {
   width: auto;
   margin: 20px 50px 50px 50px;
@@ -239,7 +213,7 @@ span.br-helper {
   color: #450CD4;
 }
 
-.shell-body li.comment, .shell-top-bar, #btn-copy, .br-helper2 {
+.shell-body li.comment, li.space, .shell-top-bar, #btn-copy {
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -283,10 +257,7 @@ span.br-helper {
 function copy_to_clipboard() {
   let clipboard = document.getElementById("clipboard");
   let commands = Array.from(document.querySelectorAll('.cmd')).map((n) => n.innerText).join('\n');
-  commands = commands.replace(/\\ /g, "");
-  commands = commands.replace(/\\\n/g, " ");
-  commands = commands.replace(/  /g, " ");
-  clipboard.value = commands;
+  clipboard.value = commands.replace(/\n+/g, "\n");
   clipboard.select();
 
   if(!document.execCommand("copy")) {
@@ -308,16 +279,16 @@ function copy_to_clipboard() {
 </li>
 
 <li class='cmd'>
-kubectl config
-{{ arg "set-credentials " .email }}
-{{ arg "--auth-provider=oidc" }}
-{{ arg "--auth-provider-arg=client-id=" .clientID }}
-{{ arg "--auth-provider-arg=client-secret=" .clientSecret }}
-{{ arg "--auth-provider-arg=id-token=" .idToken }}
-{{ arg "--auth-provider-arg=idp-issuer-url=" .issuerURL }}
-{{ arg "--auth-provider-arg=refresh-token=" .refreshToken }}<br><br>
+kubectl config set-credentials {{ .email }} \<br>
+--auth-provider=oidc 
+--auth-provider-arg=client-id={{ .clientID }} \<br>
+--auth-provider-arg=client-secret={{ .clientSecret }}
+--auth-provider-arg=id-token={{ .idToken }} \<br>
+--auth-provider-arg=idp-issuer-url={{ .issuerURL }}
+--auth-provider-arg=refresh-token={{ .refreshToken }}; \<br>
 </li>
 
+<li class='space'>&nbsp;</li>
 <li class='comment'>Configure your context to use your Google user account</li>
 <li class='comment'>Go to to your kube config and update user under context part to:</li>
 <li class='comment'>'''</li>
@@ -326,35 +297,31 @@ kubectl config
 
 <li class='cmd'>
 kubectl config
-{{ arg "set-context " .context }}
-{{ arg "--cluster " .cluster }}
-{{ arg "--user " .email }}
+set-context {{ .context }}
+--cluster {{ .cluster }}
+--user {{ .email }}; \
 </li>
 {{ if .caData }}
-<li class='cmd'>
-echo '{{ .caData }}' {{ arg "| " }}
-{{ arg "tr -cd 'a-zA-Z0-9=/' | " }}
-{{ arg "base64 --decode > ca-data" }}</li>
+<li class='cmd'>echo '{{ .caData }}' | \<br>
+tr -cd 'a-zA-Z0-9=/' | base64 --decode > ca-data; \</li>
 <li class='cmd'>
 kubectl config
-{{ arg "set-cluster " .cluster }}
-{{ arg "--embed-certs=true" }}
-{{ arg "--certificate-authority=ca-data" }}
-{{ arg "--server=https://api." .cluster }}
-</li>
-<li class='cmd'>rm ca-data</li>
+set-cluster {{ .cluster }}
+--embed-certs=true
+--certificate-authority=ca-data
+--server=https://api.{{ .cluster }}; \</li>
+<li class='cmd'>rm ca-data; \</li>
 {{ else }}
 <li class='cmd'>
 kubectl config
-{{ arg "set-cluster " .cluster }}
-{{ arg "--insecure-skip-tls-verify=true" }}
-{{ arg "--server=https://api." .cluster }}
-</li>
+set-cluster {{ .cluster }}
+--insecure-skip-tls-verify=true
+--server=https://api.{{ .cluster }}; \</li>
 {{ end }}
-<li class='cmd'>kubectl config use-context {{ .context }}<br><br></li>
-
+<li class='cmd'>kubectl config use-context {{ .context }}; \</li>
+<li class='space'>&nbsp;</li>
 <li class='comment'>Test connection by running (you should see list of nodes in cluster)<br><br></li>
-<li class='cmd'>kubectl get nodes</li>
+<li class='cmd'>kubectl get nodes;</li>
   </ul>
 </div>
 </body></html>
