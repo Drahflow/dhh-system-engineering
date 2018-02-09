@@ -1,5 +1,5 @@
 deployment:
-  image: deliveryherotech/k8s-oidc-authenticator:0.1
+  image: deliveryherotech/k8s-oidc-authenticator:0.11
   imagePullPolicy: IfNotPresent
   resources:
     requests:

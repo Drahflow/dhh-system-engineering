@@ -23,9 +23,11 @@ Once the module has been added to your terraform code base and terraform has bee
 
 ## AWS CLI authentication with SSO
 
-This guide will show on how to get your credentials per account in your config file.
+You can use this tool to get AWS access keys for CLI/API access:
 
-To use this tool you need to install it with pip
+https://github.com/cevoaustralia/aws-google-auth
+
+Install it with pip:
 
 ```
 pip install aws-google-auth
@@ -47,7 +49,7 @@ Type the number (1 - 2) of the role to assume: 1
 Assuming arn:aws:iam::1234567890:role/sso/sso-administrator
 Credentials Expiration: 2018-01-25 16:11:43+01:00
 
-export AWS_ACCESS_KEY_ID='ASIAJFPE557GYRMSNISA' AWS_SECRET_ACCESS_KEY='PZL0SgLCGKrjhmO/ZxVINRdDYPGT2EyZ8sMNyele' AWS_SESSION_TOKEN='eyJ3aGF0IjoiQXJlIHlvdSB0cnlpbmcgdG8gZG8_IiwiUmVhbGx5IjoiRGlkIHlvdSB0aG91Z2h0IiwidGhhdCI6Ikkgd291bGQgcHV0IGhlcmUgYSByZWFsIGNlcnRpZmljYXRlIiwiaXMiOiJiZXR0ZXIgeW91IHRyeSBpdCBpbiBvdGhlciBwbGFjZSIsImFsZyI6IkhTMjU2In0.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.kbpcPLr822Uq2lXsrCClXpZ_CE4RbZlCurzkhF5r_d0' AWS_SESSION_EXPIRATION='2018-01-25T15:11:43+0000'
+export AWS_ACCESS_KEY_ID='ASIAXXXXXXXXXX' AWS_SECRET_ACCESS_KEY='xxxxxxxxxxxxxxxxxxxxx' AWS_SESSION_TOKEN='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' AWS_SESSION_EXPIRATION='2018-01-25T15:11:43+0000'
 ```
 
 Parameters:

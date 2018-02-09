@@ -30,16 +30,12 @@ Pull requests welcome!
 ## Kubernetes Examples
 
 - [Deployment, Service and Autoscaling](kubernetes/examples/deployment_service): A simple example of a Kubernetes deployment, different service types and a horizontal pod autoscaler.
-
 - [Helm templating](kubernetes/examples/helm): A simple example using Helm to template Kubernetes resources.
-
 - [Ingress Controller](kubernetes/examples/ingress): Using an Ingress controller and resource to split traffic across multiple applications.
-
 - [ExternalDNS](kubernetes/examples/external-dns): A tool that automatically creates DNS records for Kubernetes resources.
-
 - [Kubernetes Best Practices](https://speakerdeck.com/thesandlord/kubernetes-best-practices): A great presentation from a Google engineer.
-
 - [Kubernetes Autoscaling](kubernetes/examples/autoscaling): How to set up autoscaling for both deployment and cluster nodes.
+- [Kubernetes dashboard with OAuth2](kubernetes/examples/dashboard-oauth): Run the Kubernetes dashboard behind OAuth2
 
 ## Other useful tools
 

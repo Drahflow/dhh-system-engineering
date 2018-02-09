@@ -6,6 +6,8 @@ Credit to [cu12](https://github.com/cu12/k8s-oidc-helper) for this adaptation of
 
 ## Security Properties
 
+**You should never use OIDC authentication without RBAC enabled**
+
 The setup described in this README checks authentication and authorization as follows:
   1. The k8s-oidc-authenticator will use google to authenticate a user (and the associated email address)
      as a valid and semi-current google user.
@@ -77,7 +79,7 @@ oidc:
   # These values are from the API & Services page of GCP
   client_id: "2222222-xxxxxx.apps.googleusercontent.com"
   client_secret: "xxxxxxx"
-  allowed_domain: my-org.com
+  allowed_domain: my-domain.com
 
 role_bindings:
   # Email addresses given admin access
@@ -99,4 +101,4 @@ helm install kubernetes/examples/k8s-oidc-authenticator/helm-chart --name k8s-oi
 
 ## Use
 
-Simply open your configured ingress hostname, `ingress.hostname` from above, in your browser and you will be redirected to Google for authentication. If your email address matches one of from `role_bindings` section of the configuration, you will see the required `kubectl` commands in order to connect to the cluster.
+Simply open your configured ingress hostname in a browser, `k8s-oauth.my-domain.com` from above, and you will be redirected to Google for authentication. If your email address matches one of from `role_bindings` section of the configuration, you will see the required `kubectl` commands in order to connect to the cluster.
